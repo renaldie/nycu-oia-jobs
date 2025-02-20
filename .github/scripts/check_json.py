@@ -9,8 +9,7 @@ def send_notification(changes):
     changes: dict with 'intern' and 'fulltime' lists of updates
     """
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-    title = f"Updates in NYCU OIA Jobs ({current_time})"
-    body = []
+    body = [f"Updates in NYCU OIA Jobs ({current_time})\n\n"]
     
     if changes.get('intern'):
         body.append("Changes detected in Intern:")
@@ -21,12 +20,8 @@ def send_notification(changes):
         body.append("Changes detected in Full Time:")
         body.extend(changes['fulltime'])
     
-    # Write to step summary
-    with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-        f.write(f"## {title}\n{''.join(body)}\n")
-    
-    # Create notice that will trigger email
-    print(f"::notice title={title}::{' '.join(body)}")
+    # Print the notification content directly
+    print(''.join(body))
     
     # Debug prints
     print(f"Notification title: {title}")
