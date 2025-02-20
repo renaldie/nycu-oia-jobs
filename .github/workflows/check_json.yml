@@ -23,16 +23,24 @@ jobs:
         run: pip install requests
 
       - name: Check JSON changes
+        id: check_json
         env:
-          NOTIFY_EMAIL: renega99@gmail.com
+          NOTIFY_EMAIL: ${{ secrets.EMAIL_USERNAME }}
           JSON_URL_1: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0016&mserno=07d5a12a-fbc5-492a-ba47-be3b2ff68813&type=json&id=807
           JSON_URL_2: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0017&mserno=2f9f7ba1-83f8-4ae2-8154-9ef23ded61a2&type=json&id=814
         run: |
-          python .github/scripts/check_json.py
+          output=$(python .github/scripts/check_json.py)
+          echo "::set-output name=changes::$output"
 
-      - name: Check notification status
-        if: always()
-        run: |
-          echo "Checking if notifications were sent"
-          echo "GitHub Actor: ${{ github.actor }}"
-          echo "Email configured: ${{ env.NOTIFY_EMAIL }}"
+      - name: Send email
+        if: steps.check_json.outputs.changes != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: Updates in NYCU OIA Jobs
+          body: ${{ steps.check_json.outputs.changes }}
+          to: renega99@gmail.com
+          from: GitHub Action
