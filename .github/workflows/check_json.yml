@@ -1,7 +1,7 @@
 name: Check JSON Changes
 on:
   schedule:
-    - cron: '23 15 * * *'
+    - cron: '00 16 * * *'
   workflow_dispatch:
 
 permissions:
