@@ -29,11 +29,13 @@ jobs:
           JSON_URL_1: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0016&mserno=07d5a12a-fbc5-492a-ba47-be3b2ff68813&type=json&id=807
           JSON_URL_2: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0017&mserno=2f9f7ba1-83f8-4ae2-8154-9ef23ded61a2&type=json&id=814
         run: |
-          output=$(python .github/scripts/check_json.py)
-          echo "::set-output name=changes::$output"
+          # Run the script and capture its output
+          python .github/scripts/check_json.py > notification_content.txt
+          # Save the content to GITHUB_OUTPUT
+          echo "notification_content=$(cat notification_content.txt)" >> $GITHUB_OUTPUT
 
       - name: Send email
-        if: steps.check_json.outputs.changes != ''
+        if: steps.check_json.outputs.notification_content != ''
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -41,6 +43,8 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: Updates in NYCU OIA Jobs
-          body: ${{ steps.check_json.outputs.changes }}
-          to: renega99@gmail.com
+          to: ${{ secrets.EMAIL_USERNAME }}
           from: GitHub Action
+          body_format: text
+          body: |
+            ${{ steps.check_json.outputs.notification_content }}
