@@ -28,7 +28,12 @@ jobs:
           JSON_URL_1: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0016&mserno=07d5a12a-fbc5-492a-ba47-be3b2ff68813&type=json&id=807
           JSON_URL_2: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0017&mserno=2f9f7ba1-83f8-4ae2-8154-9ef23ded61a2&type=json&id=814
         run: |
-          notification_content=$(python .github/scripts/check_json.py)
+          # Save git operations output separately
+          git_output=$(python .github/scripts/check_json.py 2>&1)
+          
+          # Extract only the notification part (everything after "Sending notification for changes")
+          notification_content=$(echo "$git_output" | sed -n '/Updates in NYCU OIA Jobs/,$p')
+          
           echo "NOTIFICATION_CONTENT<<EOF" >> $GITHUB_ENV
           echo "$notification_content" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -44,5 +49,4 @@ jobs:
           subject: Updates in NYCU OIA Jobs
           to: ${{ secrets.EMAIL_USERNAME }}
           from: GitHub Action
-          body_format: text
           body: ${{ env.NOTIFICATION_CONTENT }}
