@@ -43,6 +43,27 @@ def compare_json_data(current_data, previous_data):
             updates.append(f"{current_item['subject']} ({current_item['updateDate']})\n")
     return updates
 
+def make_request_with_retry(url, max_retries=3, delay=5):
+    """Make HTTP request with retry logic"""
+    import time
+    
+    for attempt in range(max_retries):
+        try:
+            # Add headers to make request more like a browser
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'application/json',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
+            response = requests.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:  # Last attempt
+                raise  # Re-raise the last exception
+            print(f"Attempt {attempt + 1} failed: {str(e)}")
+            time.sleep(delay)  # Wait before retrying
+
 def main():
     urls = {
         ('data/nycu_intern.json', 'intern'): os.environ['JSON_URL_1'],
@@ -54,8 +75,7 @@ def main():
     
     for (filename, job_type), url in urls.items():
         try:
-            response = requests.get(url)
-            response.raise_for_status()
+            response = make_request_with_retry(url)
             current_data = response.json()
             
             previous_data = None
