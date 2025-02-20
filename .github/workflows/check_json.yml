@@ -1,0 +1,27 @@
+name: Check JSON Changes
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs at 00:00 UTC daily
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Check JSON changes
+        env:
+          NOTIFY_EMAIL: renega99@gmail.com
+          JSON_URL_1: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0016&mserno=07d5a12a-fbc5-492a-ba47-be3b2ff68813&type=json&id=807
+          JSON_URL_2: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0017&mserno=2f9f7ba1-83f8-4ae2-8154-9ef23ded61a2&type=json&id=814
+        run: |
+          python .github/scripts/check_json.py
