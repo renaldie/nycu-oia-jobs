@@ -98,41 +98,61 @@ def save_json_safely(data, filename):
             raise
 
 def main():
+    print("Starting main function...")
     ensure_data_directory()
+    print("Data directory check completed")
     
     urls = {
         ('data/nycu_intern.json', 'intern'): os.environ['JSON_URL_1'],
         ('data/nycu_fulltime.json', 'fulltime'): os.environ['JSON_URL_2']
     }
     
+    print(f"Working directory: {os.getcwd()}")
+    print(f"Directory contents: {os.listdir('.')}")
+    
     all_changes = {}
     
     for (filename, job_type), url in urls.items():
+        print(f"Processing {job_type} from {url}")
         try:
             response = make_request_with_retry(url)
+            print(f"Got response for {job_type}")
             current_data = response.json()
+            print(f"Parsed JSON for {job_type}")
             
             previous_data = None
             if os.path.exists(filename):
+                print(f"Found existing file: {filename}")
                 try:
                     with open(filename, 'r', encoding='utf-8') as f:
                         previous_data = json.load(f)
+                    print(f"Loaded previous data from {filename}")
                 except Exception as e:
                     print(f"Error reading previous data from {filename}: {str(e)}")
+            else:
+                print(f"No existing file found at {filename}")
             
             updates = compare_json_data(current_data, previous_data)
             if updates:
+                print(f"Found updates for {job_type}")
                 all_changes[job_type] = updates
             
             # Always save current data
+            print(f"Attempting to save data for {job_type}")
             save_json_safely(current_data, filename)
+            print(f"Saved data for {job_type}")
                 
         except Exception as e:
             print(f"Error checking {job_type} jobs: {str(e)}")
     
     # Send notification only if there are changes
     if all_changes:
+        print("Sending notification for changes")
         send_notification(all_changes)
+    else:
+        print("No changes to notify")
 
 if __name__ == '__main__':
+    print("Script started")
     main()
+    print("Script completed")
