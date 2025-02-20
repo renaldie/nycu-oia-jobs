@@ -149,6 +149,12 @@ def main():
     if all_changes:
         print("Sending notification for changes")
         send_notification(all_changes)
+        # After sending notification, commit changes
+        os.system('git config --global user.name "GitHub Action"')
+        os.system('git config --global user.email "action@github.com"')
+        os.system('git add data/*.json')
+        os.system('git commit -m "Update JSON states"')
+        os.system('git push')
     else:
         print("No changes to notify")
 
