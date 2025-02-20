@@ -12,13 +12,13 @@ def send_notification(changes):
     body = [f"Updates in NYCU OIA Jobs ({current_time})\n\n"]
     
     if changes.get('intern'):
-        body.append("Changes detected in Intern:\n")
+        body.append("New updates in Intern Jobs:\n")
         body.extend(changes['intern'])
         body.append("")  # Empty line for spacing
         body.append("\n")
         
     if changes.get('fulltime'):
-        body.append("Changes detected in Full Time:\n")
+        body.append("New updates in Full Time Jobs:\n")
         body.extend(changes['fulltime'])
     
     # Print the notification content directly
