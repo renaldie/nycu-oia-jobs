@@ -21,9 +21,17 @@ def send_notification(changes):
         body.append("Changes detected in Full Time:")
         body.extend(changes['fulltime'])
     
+    # Write to step summary
     with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
         f.write(f"## {title}\n{''.join(body)}\n")
-    print(f"::notice title={title}::{''.join(body)}")
+    
+    # Create notice that will trigger email
+    print(f"::notice title={title}::{' '.join(body)}")
+    
+    # Debug prints
+    print(f"Notification title: {title}")
+    print(f"Notification body length: {len(''.join(body))}")
+    print("Email notification attempt completed")
 
 def compare_json_data(current_data, previous_data):
     """Compare current and previous JSON data and return list of changes"""
