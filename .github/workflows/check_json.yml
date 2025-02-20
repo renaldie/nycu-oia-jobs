@@ -23,20 +23,19 @@ jobs:
         run: pip install requests
 
       - name: Check JSON changes
-        id: check_json
         env:
           NOTIFY_EMAIL: ${{ secrets.EMAIL_USERNAME }}
           JSON_URL_1: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0016&mserno=07d5a12a-fbc5-492a-ba47-be3b2ff68813&type=json&id=807
           JSON_URL_2: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0017&mserno=2f9f7ba1-83f8-4ae2-8154-9ef23ded61a2&type=json&id=814
         run: |
-          # Run the script and capture its output
-          python .github/scripts/check_json.py > notification_content.txt
-          # Save the content to GITHUB_OUTPUT
-          echo "notification_content=$(cat notification_content.txt)" >> $GITHUB_OUTPUT
+          notification_content=$(python .github/scripts/check_json.py)
+          echo "NOTIFICATION_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$notification_content" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Send email
-        if: steps.check_json.outputs.notification_content != ''
-        uses: dawidd6/action-send-mail@v3
+        if: env.NOTIFICATION_CONTENT != ''
+        uses: dawidd6/action-send-mail@v4
         with:
           server_address: smtp.gmail.com
           server_port: 465
@@ -46,5 +45,4 @@ jobs:
           to: ${{ secrets.EMAIL_USERNAME }}
           from: GitHub Action
           body_format: text
-          body: |
-            ${{ steps.check_json.outputs.notification_content }}
+          body: ${{ env.NOTIFICATION_CONTENT }}
