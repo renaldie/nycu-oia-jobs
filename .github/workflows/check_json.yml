@@ -1,8 +1,8 @@
 name: Check JSON Changes
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs at 00:00 UTC daily
-  workflow_dispatch:      # Allows manual trigger
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,3 +29,10 @@ jobs:
           JSON_URL_2: https://oia.nycu.edu.tw/oia/en/app/openData/data/list?module=nycu0017&mserno=2f9f7ba1-83f8-4ae2-8154-9ef23ded61a2&type=json&id=814
         run: |
           python .github/scripts/check_json.py
+
+      - name: Check notification status
+        if: always()
+        run: |
+          echo "Checking if notifications were sent"
+          echo "GitHub Actor: ${{ github.actor }}"
+          echo "Email configured: ${{ env.NOTIFY_EMAIL }}"
