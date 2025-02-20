@@ -160,6 +160,4 @@ def main():
         print("No changes to notify")
 
 if __name__ == '__main__':
-    print("Script started")
     main()
-    print("Script completed")
