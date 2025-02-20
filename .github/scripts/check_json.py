@@ -22,11 +22,6 @@ def send_notification(changes):
     
     # Print the notification content directly
     print(''.join(body))
-    
-    # Debug prints
-    print(f"Notification title: {title}")
-    print(f"Notification body length: {len(''.join(body))}")
-    print("Email notification attempt completed")
 
 def compare_json_data(current_data, previous_data):
     """Compare current and previous JSON data and return list of changes"""
