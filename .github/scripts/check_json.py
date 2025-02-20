@@ -46,8 +46,8 @@ def check_json_url(url, filename):
 
 def main():
     urls = {
-        'nycu-oia-intern.json': os.environ['JSON_URL_1'],
-        'nycu-oia-fulltime.json': os.environ['JSON_URL_2']
+        'data/nycu_intern.json': os.environ['JSON_URL_1'],
+        'data/nycu_fulltime.json': os.environ['JSON_URL_2']
     }
     
     changes_detected = False
