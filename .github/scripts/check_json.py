@@ -133,3 +133,6 @@ def main():
     # Send notification only if there are changes
     if all_changes:
         send_notification(all_changes)
+
+if __name__ == '__main__':
+    main()
