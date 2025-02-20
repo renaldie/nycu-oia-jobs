@@ -64,14 +64,48 @@ def make_request_with_retry(url, max_retries=3, delay=5):
             print(f"Attempt {attempt + 1} failed: {str(e)}")
             time.sleep(delay)  # Wait before retrying
 
+def ensure_data_directory():
+    """Ensure the data directory exists"""
+    data_dir = 'data'
+    if not os.path.exists(data_dir):
+        try:
+            os.makedirs(data_dir)
+            print(f"Created directory: {data_dir}")
+        except Exception as e:
+            print(f"Error creating directory: {str(e)}")
+            raise
+
+def save_json_safely(data, filename):
+    """Safely save JSON data to file with error handling"""
+    try:
+        # First write to a temporary file
+        temp_filename = filename + '.tmp'
+        with open(temp_filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        
+        # Then rename it to the target file (atomic operation)
+        os.replace(temp_filename, filename)
+        print(f"Successfully saved: {filename}")
+    except Exception as e:
+        print(f"Error saving file {filename}: {str(e)}")
+        # Try one more time with force write
+        try:
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            print(f"Successfully saved with force write: {filename}")
+        except Exception as e:
+            print(f"Critical error saving file {filename}: {str(e)}")
+            raise
+
 def main():
+    ensure_data_directory()
+    
     urls = {
         ('data/nycu_intern.json', 'intern'): os.environ['JSON_URL_1'],
         ('data/nycu_fulltime.json', 'fulltime'): os.environ['JSON_URL_2']
     }
     
     all_changes = {}
-    changes_detected = False
     
     for (filename, job_type), url in urls.items():
         try:
@@ -80,26 +114,22 @@ def main():
             
             previous_data = None
             if os.path.exists(filename):
-                with open(filename, 'r') as f:
-                    previous_data = json.load(f)
+                try:
+                    with open(filename, 'r', encoding='utf-8') as f:
+                        previous_data = json.load(f)
+                except Exception as e:
+                    print(f"Error reading previous data from {filename}: {str(e)}")
             
             updates = compare_json_data(current_data, previous_data)
             if updates:
                 all_changes[job_type] = updates
-                changes_detected = True
             
-            # Save current data
-            with open(filename, 'w') as f:
-                json.dump(current_data, f, indent=2)
+            # Always save current data
+            save_json_safely(current_data, filename)
                 
         except Exception as e:
             print(f"Error checking {job_type} jobs: {str(e)}")
     
-    if changes_detected:
+    # Send notification only if there are changes
+    if all_changes:
         send_notification(all_changes)
-        # Git commands for committing changes
-        os.system('git config --global user.name "GitHub Action"')
-        os.system('git config --global user.email "action@github.com"')
-        os.system('git add data/*.json')
-        os.system('git commit -m "Update JSON states"')
-        os.system('git push')
