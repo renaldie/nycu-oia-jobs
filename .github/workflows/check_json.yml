@@ -48,5 +48,5 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: Updates in NYCU OIA Jobs
           to: ${{ secrets.EMAIL_USERNAME }}
-          from: GitHub Action
+          from: Github nycu-oia-jobs
           body: ${{ env.NOTIFICATION_CONTENT }}
